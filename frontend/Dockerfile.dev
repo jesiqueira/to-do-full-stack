@@ -1,0 +1,23 @@
+# Arquivo: frontend/Dockerfile.dev
+
+# 1. Usa a mesma versão do Node.js que o backend para consistência
+FROM node:22-alpine
+
+# Define o diretório de trabalho dentro do contêiner
+WORKDIR /app
+
+# 2. Copia e instala dependências para aproveitar o cache
+# Usamos a cópia da pasta local do frontend que está dentro do projeto
+COPY package*.json ./
+RUN npm install
+
+# 3. Copia o restante do código, incluindo o .env (Apenas necessário para o BUILD inicial)
+# O Volume do docker-compose vai garantir o Hot Reload
+COPY . .
+
+# A porta padrão do servidor de desenvolvimento Vite
+EXPOSE 5173
+
+# 4. Comando para iniciar o servidor de desenvolvimento Vite
+# O comando 'npm run dev' já deve estar configurado no package.json do frontend
+CMD ["npm", "run", "dev"]

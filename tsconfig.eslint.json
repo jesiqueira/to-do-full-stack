@@ -1,0 +1,17 @@
+// tsconfig.eslint.json
+
+{
+  // Herda todas as opções do seu arquivo principal
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Sobrescreve 'outDir' para evitar que o ts-node-dev use a config de build
+    "outDir": "dist-temp-eslint",
+    // Garante que o ESLint possa ver todos os arquivos
+    "noEmit": true
+  },
+   // Inclui também os testes para análise do ESLint
+  "include": ["src/**/*", "__tests__/**/*"],
+  
+  // Remove as exclusões para que o ESLint possa analisar os arquivos de teste
+  "exclude": []
+}
