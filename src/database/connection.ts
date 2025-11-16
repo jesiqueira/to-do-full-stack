@@ -11,11 +11,8 @@ import databaseConfig from './config'
 // =======================================================
 // 📁 MODELOS - IMPORTE SEUS MODELOS AQUI
 // =======================================================
-
-// EXEMPLOS (descomente e adapte):
-// import User from './models/User'
-// import Tarefa from './models/Tarefa'
-// import { Product, Category } from './models'
+import { Usuario } from './models/Usuario'
+import { Tarefa } from './models/Tarefa'
 
 // =======================================================
 // Tipagem auxiliar: qualquer Model que possa ter associate()
@@ -40,10 +37,8 @@ export const sequelize = new Sequelize(config)
 // =======================================================
 
 // EXEMPLOS (descomente e adapte):
-// User.initialize(sequelize)
-// Tarefa.initModel(sequelize)
-// Product.initModel(sequelize)
-// Category.initModel(sequelize)
+Usuario.initModel(sequelize)
+Tarefa.initModel(sequelize)
 
 // =======================================================
 // 4. Define associações automaticamente

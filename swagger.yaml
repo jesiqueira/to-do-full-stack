@@ -1,0 +1,601 @@
+openapi: 3.0.0
+info:
+  title: Tarefa API - Gestão de Tempo (TO-DO)
+  description: API para gestão de tarefas e usuários com autenticação
+  version: 1.0.0
+  contact:
+    name: Suporte API
+    email: suporte@exemplo.com
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor de Desenvolvimento localhost
+  - url: https://api.seudominio.com
+    description: Servidor de Produção
+
+tags:
+  - name: Autenticação
+    description: Operações de login e registro de usuários
+  - name: Usuários
+    description: Operações de gerenciamento de usuários
+  - name: Tarefas
+    description: Operações de gerenciamento de tarefas
+
+paths:
+  /api/usuarios/cadastro:
+    post:
+      tags:
+        - Autenticação
+      summary: Registrar novo usuário
+      description: Cria uma nova conta de usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nome
+                - email
+                - senha
+              properties:
+                nome:
+                  type: string
+                  example: 'João Silva'
+                email:
+                  type: string
+                  format: email
+                  example: 'joao@email.com'
+                senha:
+                  type: string
+                  format: password
+                  minLength: 6
+                  example: 'senha123'
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Usuário criado com sucesso'
+                  usuario:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      nome:
+                        type: string
+                        example: 'João Silva'
+                      email:
+                        type: string
+                        example: 'joao@email.com'
+        '400':
+          description: Dados inválidos ou email já cadastrado
+        '500':
+          description: Erro interno do servidor
+
+  /api/usuarios/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Fazer login
+      description: Autentica um usuário e retorna um token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - senha
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: 'joao@email.com'
+                senha:
+                  type: string
+                  format: password
+                  example: 'senha123'
+      responses:
+        '200':
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+                  usuario:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      nome:
+                        type: string
+                        example: 'João Silva'
+                      email:
+                        type: string
+                        example: 'joao@email.com'
+        '401':
+          description: Credenciais inválidas
+        '400':
+          description: Dados inválidos
+
+  /api/usuarios/me:
+    get:
+      tags:
+        - Usuários
+      summary: Buscar usuário logado
+      description: Retorna os dados do usuário autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  nome:
+                    type: string
+                    example: 'João Silva'
+                  email:
+                    type: string
+                    example: 'joao@email.com'
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: '2024-01-01T10:00:00.000Z'
+        '401':
+          description: Não autorizado
+        '404':
+          description: Usuário não encontrado
+
+    put:
+      tags:
+        - Usuários
+      summary: Atualizar usuário logado
+      description: Atualiza os dados do usuário autenticado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                  example: 'João Silva Santos'
+                email:
+                  type: string
+                  format: email
+                  example: 'joao.santos@email.com'
+                senha:
+                  type: string
+                  format: password
+                  minLength: 6
+                  example: 'novaSenha123'
+      responses:
+        '200':
+          description: Usuário atualizado com sucesso
+        '400':
+          description: Dados inválidos
+        '401':
+          description: Não autorizado
+
+    delete:
+      tags:
+        - Usuários
+      summary: Deletar usuário logado
+      description: Remove a conta do usuário autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Usuário deletado com sucesso
+        '401':
+          description: Não autorizado
+
+  /api/tarefas:
+    get:
+      tags:
+        - Tarefas
+      summary: Listar tarefas com filtros
+      description: Retorna lista de tarefas do usuário logado com possibilidade de filtro
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pendente, em_andamento, concluida]
+          description: Filtrar por status
+        - name: usuarioId
+          in: query
+          schema:
+            type: integer
+          description: Filtrar por ID do usuário (apenas admin)
+      responses:
+        '200':
+          description: Lista de tarefas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tarefa'
+        '401':
+          description: Não autorizado
+
+    post:
+      tags:
+        - Tarefas
+      summary: Criar nova tarefa
+      description: Cria uma nova tarefa para o usuário logado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - titulo
+              properties:
+                titulo:
+                  type: string
+                  example: 'Estudar TypeScript'
+                descricao:
+                  type: string
+                  example: 'Estudar conceitos avançados de TypeScript'
+                status:
+                  type: string
+                  enum: [pendente, em_andamento, concluida]
+                  default: pendente
+                  example: 'pendente'
+      responses:
+        '201':
+          description: Tarefa criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarefa'
+        '400':
+          description: Dados inválidos
+        '401':
+          description: Não autorizado
+
+  /api/tarefas/{id}:
+    get:
+      tags:
+        - Tarefas
+      summary: Buscar tarefa por ID
+      description: Retorna uma tarefa específica pelo ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID da tarefa
+      responses:
+        '200':
+          description: Tarefa encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarefa'
+        '401':
+          description: Não autorizado
+        '404':
+          description: Tarefa não encontrada
+
+    put:
+      tags:
+        - Tarefas
+      summary: Atualizar tarefa
+      description: Atualiza uma tarefa existente
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID da tarefa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                titulo:
+                  type: string
+                  example: 'Tarefa atualizada'
+                descricao:
+                  type: string
+                  example: 'Descrição atualizada'
+                status:
+                  type: string
+                  enum: [pendente, em_andamento, concluida]
+                  example: 'em_andamento'
+      responses:
+        '200':
+          description: Tarefa atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarefa'
+        '400':
+          description: Dados inválidos
+        '401':
+          description: Não autorizado
+        '404':
+          description: Tarefa não encontrada
+
+    delete:
+      tags:
+        - Tarefas
+      summary: Deletar tarefa
+      description: Remove uma tarefa pelo ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID da tarefa
+      responses:
+        '200':
+          description: Tarefa deletada com sucesso
+        '401':
+          description: Não autorizado
+        '404':
+          description: Tarefa não encontrada
+
+  /api/tarefas/status/{status}:
+    get:
+      tags:
+        - Tarefas
+      summary: Buscar tarefas por status
+      description: Retorna tarefas filtradas por status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [pendente, em_andamento, concluida]
+          description: Status para filtrar
+      responses:
+        '200':
+          description: Lista de tarefas filtradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tarefa'
+        '401':
+          description: Não autorizado
+
+  /api/tarefas/usuario/{usuarioId}:
+    get:
+      tags:
+        - Tarefas
+      summary: Buscar tarefas por usuário
+      description: Retorna tarefas de um usuário específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: usuarioId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário
+      responses:
+        '200':
+          description: Lista de tarefas do usuário
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tarefa'
+        '401':
+          description: Não autorizado
+
+  /api/tarefas/{id}/concluir:
+    patch:
+      tags:
+        - Tarefas
+      summary: Marcar tarefa como concluída
+      description: Atualiza o status da tarefa para "concluida"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID da tarefa
+      responses:
+        '200':
+          description: Tarefa marcada como concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarefa'
+        '401':
+          description: Não autorizado
+        '404':
+          description: Tarefa não encontrada
+
+  /api/tarefas/{id}/pendente:
+    patch:
+      tags:
+        - Tarefas
+      summary: Marcar tarefa como pendente
+      description: Atualiza o status da tarefa para "pendente"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID da tarefa
+      responses:
+        '200':
+          description: Tarefa marcada como pendente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarefa'
+        '401':
+          description: Não autorizado
+        '404':
+          description: Tarefa não encontrada
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        nome:
+          type: string
+          example: 'João Silva'
+        email:
+          type: string
+          format: email
+          example: 'joao@email.com'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2024-01-01T10:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2024-01-01T10:00:00.000Z'
+      required:
+        - id
+        - nome
+        - email
+
+    Tarefa:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        titulo:
+          type: string
+          example: 'Estudar TypeScript'
+        descricao:
+          type: string
+          nullable: true
+          example: 'Estudar conceitos avançados de TypeScript'
+        status:
+          type: string
+          enum: [pendente, em_andamento, concluida]
+          example: 'pendente'
+        usuarioId:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          example: '2024-01-01T10:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2024-01-01T10:00:00.000Z'
+      required:
+        - id
+        - titulo
+        - status
+        - usuarioId
+
+  responses:
+    UnauthorizedError:
+      description: Token de acesso não fornecido ou inválido
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Token de acesso inválido'
+
+    NotFoundError:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: 'Recurso não encontrado'
+
+    ValidationError:
+      description: Dados de entrada inválidos
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: 'Dados de entrada inválidos'
+              details:
+                type: array
+                items:
+                  type: object
+
+security:
+  - bearerAuth: []
