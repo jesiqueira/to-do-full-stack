@@ -20,7 +20,7 @@ export interface Task {
   id: number
   title: string
   description: string
-  status: 'TODO' | 'IN_PROGRESS' | 'DONE'
+  status: 'pendente' | 'en_progresso' | 'concluida'
   userId: number
   createdAt: string
   updatedAt: string

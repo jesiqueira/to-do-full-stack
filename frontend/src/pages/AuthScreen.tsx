@@ -6,9 +6,11 @@ import { authService } from '@/features/auth/services/authService'
 import type { RegisterData, LoginCredentials } from '@/features/auth/types'
 
 export const AuthScreen = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [nome, setNome] = useState('')
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    nome: '',
+  })
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false)
   const [authAttempted, setAuthAttempted] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
@@ -20,7 +22,11 @@ export const AuthScreen = () => {
     setIsSubmittingAuth(true)
     setError(null)
     try {
-      const userData: RegisterData = { email, password, nome }
+      const userData: RegisterData = {
+        email: formData.email,
+        password: formData.password,
+        nome: formData.nome,
+      }
       const newUser = await authService.register(userData)
       setUser(newUser)
       console.log('Usuário cadastrado:', newUser)
@@ -37,7 +43,10 @@ export const AuthScreen = () => {
     setIsSubmittingAuth(true)
     setError(null)
     try {
-      const credentials: LoginCredentials = { email, password }
+      const credentials: LoginCredentials = {
+        email: formData.email,
+        password: formData.password,
+      }
       const authResponse = await authService.login(credentials)
       setUser(authResponse.usuario)
       localStorage.setItem('token', authResponse.token)
@@ -60,24 +69,38 @@ export const AuthScreen = () => {
     }
   }
 
+  // 🔑 HandleChange corrigido
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
   // 🔑 Login de convidado
   const handleGuestLogin = async () => {
     setAuthAttempted(true)
     setError(null)
     try {
       console.log('Login de convidado...')
+      // Adicione aqui a lógica para login de convidado
     } catch (err: any) {
       setError('Falha na autenticação de convidado.')
       setAuthAttempted(false)
     }
   }
 
-  // 🔑 HandleChange genérico
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    if (name === 'email') setEmail(value)
-    if (name === 'password') setPassword(value)
-    if (name === 'nome') setNome(value)
+  // 🔑 Alternar entre modos
+  const toggleAuthMode = () => {
+    setAuthMode((prev) => (prev === 'login' ? 'register' : 'login'))
+    setError(null)
+    // Limpa os campos ao alternar
+    setFormData({
+      email: '',
+      password: '',
+      nome: '',
+    })
   }
 
   const title = authMode === 'login' ? 'Entrar (Login)' : 'Criar Conta (Cadastro)'
@@ -93,14 +116,14 @@ export const AuthScreen = () => {
           title={title}
           switchText={switchText}
           authMode={authMode}
-          email={email}
-          password={password}
-          nome={nome}
+          email={formData.email}
+          password={formData.password}
+          nome={formData.nome}
           isSubmittingAuth={isSubmittingAuth}
           authAttempted={authAttempted}
           handleSubmit={handleSubmit}
           handleGuestLogin={handleGuestLogin}
-          setAuthMode={setAuthMode}
+          setAuthMode={toggleAuthMode} // Alterado para a função toggle
           handleChange={handleChange}
           setError={setError}
         />
