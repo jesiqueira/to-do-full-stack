@@ -4,6 +4,7 @@ import { BackgroundShape } from '@/components/layout/BackgroundShape'
 import { AuthCard } from '@/features/auth/components/AuthCard'
 import { authService } from '@/features/auth/services/authService'
 import type { RegisterData, LoginCredentials } from '@/features/auth/types'
+import { Notification } from '@/components/ui'
 
 export const AuthScreen = () => {
   const [formData, setFormData] = useState({
@@ -109,7 +110,6 @@ export const AuthScreen = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans relative isolate overflow-hidden pt-14">
       <BackgroundShape position="top" />
-
       <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40 flex flex-col lg:flex-row items-center justify-between">
         <HeroSection />
         <AuthCard
