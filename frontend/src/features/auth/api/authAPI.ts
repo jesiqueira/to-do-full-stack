@@ -10,7 +10,7 @@ export const authAPI = {
   register: (userData: RegisterData) => api.post<User>('/usuarios/cadastro', userData),
 
   // O endpoint de login retorna token e usuario no corpo principal da ApiResponse.
-  login: (credentials: LoginCredentials) => api.post<ApiResponse<null>>('', credentials),
+  login: (credentials: LoginCredentials) => api.post<ApiResponse<null>>('usuarios/login', credentials),
 
   // O endpoint /me retorna o User no campo 'data' da ApiResponse.
   getMe: () => api.get<ApiResponse<User>>('/usuarios/me'),

@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { HeroSection } from '@/components/layout/HeroSection'
 import { BackgroundShape } from '@/components/layout/BackgroundShape'
 import { AuthCard } from '@/features/auth/components/AuthCard'
 import { authService } from '@/features/auth/services/authService'
-import type { RegisterData, LoginCredentials } from '@/features/auth/types'
+import type { RegisterData, LoginCredentials, User } from '@/features/auth/types'
 import { Notification } from '@/components/ui'
+import { AxiosError } from 'axios'
 
 export const AuthScreen = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +17,21 @@ export const AuthScreen = () => {
   const [authAttempted, setAuthAttempted] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [error, setError] = useState<string | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [notification, setNotification] = useState<{
+    message: string
+    type: 'success' | 'error' | 'info'
+  } | null>(null)
+
+  // 🔑 Função para mostrar notificação
+  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setNotification({ message, type })
+  }
+
+  // 🔑 Função para limpar notificação
+  const clearNotification = () => {
+    setNotification(null)
+  }
 
   // 🔑 Cadastro
   const handleRegister = async () => {
@@ -30,10 +45,11 @@ export const AuthScreen = () => {
       }
       const newUser = await authService.register(userData)
       setUser(newUser)
+      setAuthMode('login')
       console.log('Usuário cadastrado:', newUser)
-    } catch (err: any) {
-      console.error('Erro no cadastro:', err)
-      setError(err.message || 'Falha no cadastro. Tente novamente.')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof AxiosError ? err.response?.data.error : 'Falha no cadastro. Tente novamente.'
+      showNotification(errorMessage, 'error')
     } finally {
       setIsSubmittingAuth(false)
     }
@@ -110,6 +126,10 @@ export const AuthScreen = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans relative isolate overflow-hidden pt-14">
       <BackgroundShape position="top" />
+
+      {/* Notificação única - mesma abordagem do seu outro projeto */}
+      {notification && <Notification message={notification.message} type={notification.type} onClose={clearNotification} />}
+
       <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40 flex flex-col lg:flex-row items-center justify-between">
         <HeroSection />
         <AuthCard
