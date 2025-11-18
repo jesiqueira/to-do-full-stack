@@ -72,7 +72,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({
             setAuthMode(authMode === 'login' ? 'register' : 'login')
           }}
           className="text-sm text-blue-500 hover:text-blue-700 transition duration-150"
-          type="button" // Adicione isso
+          type="button" 
         >
           {switchText}
         </button>
