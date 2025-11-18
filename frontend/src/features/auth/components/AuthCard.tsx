@@ -18,7 +18,6 @@ interface AuthCardProps {
   handleGuestLogin: () => void
   setAuthMode: (mode: 'login' | 'register') => void
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  setError: (err: string | null) => void
 }
 
 export const AuthCard: React.FC<AuthCardProps> = ({
@@ -34,7 +33,6 @@ export const AuthCard: React.FC<AuthCardProps> = ({
   handleGuestLogin,
   setAuthMode,
   handleChange,
-  setError,
 }) => {
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl border border-gray-100 lg:w-1/3">
@@ -72,7 +70,6 @@ export const AuthCard: React.FC<AuthCardProps> = ({
         <button
           onClick={() => {
             setAuthMode(authMode === 'login' ? 'register' : 'login')
-            setError(null)
           }}
           className="text-sm text-blue-500 hover:text-blue-700 transition duration-150"
           type="button" // Adicione isso

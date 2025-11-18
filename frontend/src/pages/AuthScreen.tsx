@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import { HeroSection } from '@/components/layout/HeroSection'
 import { BackgroundShape } from '@/components/layout/BackgroundShape'
 import { AuthCard } from '@/features/auth/components/AuthCard'
 import { authService } from '@/features/auth/services/authService'
-import type { RegisterData, LoginCredentials, User } from '@/features/auth/types'
+import type { RegisterData, LoginCredentials} from '@/features/auth/types'
 import { Notification } from '@/components/ui'
 import { AxiosError } from 'axios'
 
@@ -16,8 +16,6 @@ export const AuthScreen = () => {
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false)
   const [authAttempted, setAuthAttempted] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
-  const [error, setError] = useState<string | null>(null)
-  const [user, setUser] = useState<User | null>(null)
   const [notification, setNotification] = useState<{
     message: string
     type: 'success' | 'error' | 'info'
@@ -36,17 +34,15 @@ export const AuthScreen = () => {
   // 🔑 Cadastro
   const handleRegister = async () => {
     setIsSubmittingAuth(true)
-    setError(null)
     try {
       const userData: RegisterData = {
         email: formData.email,
         password: formData.password,
         nome: formData.nome,
       }
-      const newUser = await authService.register(userData)
-      setUser(newUser)
+      await authService.register(userData)
       setAuthMode('login')
-      console.log('Usuário cadastrado:', newUser)
+      // console.log('Usuário cadastrado:', newUser)
     } catch (err: unknown) {
       const errorMessage = err instanceof AxiosError ? err.response?.data.error : 'Falha no cadastro. Tente novamente.'
       showNotification(errorMessage, 'error')
@@ -58,19 +54,18 @@ export const AuthScreen = () => {
   // 🔑 Login
   const handleLogin = async () => {
     setIsSubmittingAuth(true)
-    setError(null)
     try {
       const credentials: LoginCredentials = {
         email: formData.email,
         password: formData.password,
       }
       const authResponse = await authService.login(credentials)
-      setUser(authResponse.usuario)
       localStorage.setItem('token', authResponse.token)
-      console.log('Login realizado:', authResponse)
-    } catch (err: any) {
+      // console.log('Login realizado:', authResponse)
+    } catch (err: unknown) {
       console.error('Erro no login:', err)
-      setError(err.message || 'Falha no login. Verifique suas credenciais.')
+      const errorMessage = err instanceof AxiosError ? err.response?.data.error : 'Falha no login. Verifique suas credenciais.'
+      showNotification(errorMessage, 'error')
     } finally {
       setIsSubmittingAuth(false)
     }
@@ -98,12 +93,11 @@ export const AuthScreen = () => {
   // 🔑 Login de convidado
   const handleGuestLogin = async () => {
     setAuthAttempted(true)
-    setError(null)
     try {
-      console.log('Login de convidado...')
+      // console.log('Login de convidado...')
       // Adicione aqui a lógica para login de convidado
-    } catch (err: any) {
-      setError('Falha na autenticação de convidado.')
+    } catch {
+      showNotification('Falha na autenticação de convidado.')
       setAuthAttempted(false)
     }
   }
@@ -111,7 +105,6 @@ export const AuthScreen = () => {
   // 🔑 Alternar entre modos
   const toggleAuthMode = () => {
     setAuthMode((prev) => (prev === 'login' ? 'register' : 'login'))
-    setError(null)
     // Limpa os campos ao alternar
     setFormData({
       email: '',
@@ -145,7 +138,6 @@ export const AuthScreen = () => {
           handleGuestLogin={handleGuestLogin}
           setAuthMode={toggleAuthMode} // Alterado para a função toggle
           handleChange={handleChange}
-          setError={setError}
         />
       </div>
 
