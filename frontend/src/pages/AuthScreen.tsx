@@ -3,11 +3,15 @@ import { HeroSection } from '@/components/layout/HeroSection'
 import { BackgroundShape } from '@/components/layout/BackgroundShape'
 import { AuthCard } from '@/features/auth/components/AuthCard'
 import { authService } from '@/features/auth/services/authService'
-import type { RegisterData, LoginCredentials} from '@/features/auth/types'
+import type { RegisterData, LoginCredentials } from '@/features/auth/types'
 import { Notification } from '@/components/ui'
 import { AxiosError } from 'axios'
+import { useAuthStore } from '@/stores/authStore'
+import { useNavigate } from 'react-router-dom'
 
 export const AuthScreen = () => {
+  const navigate = useNavigate() // ← Adicionar
+  const { setUser } = useAuthStore() // ← Adicionar
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -60,8 +64,11 @@ export const AuthScreen = () => {
         password: formData.password,
       }
       const authResponse = await authService.login(credentials)
-      localStorage.setItem('token', authResponse.token)
-      // console.log('Login realizado:', authResponse)
+
+      // Salvar token e usuário
+      localStorage.setItem('authToken', authResponse.token)
+      setUser(authResponse.usuario)
+      navigate('/dashboard')
     } catch (err: unknown) {
       console.error('Erro no login:', err)
       const errorMessage = err instanceof AxiosError ? err.response?.data.error : 'Falha no login. Verifique suas credenciais.'
