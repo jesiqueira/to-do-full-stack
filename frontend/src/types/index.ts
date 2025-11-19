@@ -35,7 +35,7 @@ export interface ApiResponse<T = unknown> {
   message?: string
   error?: string // Campo para erros de servidor (pode ser usado pelo backend)
   data?: T // Payload de um único item (usado em GET de 1 item, PUT, POST)
-  dados?: T[] // Payload de uma lista de itens (usado em GET de coleções)
+  dados?: T // Payload de uma lista de itens (usado em GET de coleções)
 
   // Campos de Autenticação: Incluídos aqui para endpoints de login/registro
   token?: string
