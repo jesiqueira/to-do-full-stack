@@ -18,9 +18,9 @@ export interface User {
  */
 export interface Task {
   id: number
-  title: string
-  description: string
-  status: 'pendente' | 'em_progresso' | 'concluida'
+  titulo: string
+  descricao: string
+  status: 'pendente' | 'em_andamento' | 'concluida'
   userId: number
   createdAt: string
   updatedAt: string
